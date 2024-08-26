@@ -8,6 +8,17 @@ import {
 } from "react-native";
 import React from "react";
 import { useSwipe } from "../hooks/useSwipe";
+import useRead from "../hooks/useRead";
+
+
+const text= `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus facilisis, nunc sit amet tempor convallis, ex sapien fringilla tortor, eget venenatis felis justo at neque.
+
+
+Nulla nec libero ac lacus tincidunt fermentum. Integer nec quam vitae ipsum pulvinar hendrerit. Fusce gravida sapien non est faucibus, vel aliquam est lobortis. 
+
+Quisque id mauris vel mi tempus convallis. 
+
+Suspendisse ac eros suscipit, facilisis justo in, suscipit felis. Proin ultricies tincidunt magna.`
 
 const PageScreen = ({ route }) => {
   const { textMap } = route.params;
@@ -19,29 +30,14 @@ const PageScreen = ({ route }) => {
     console.log("Right swipe");
   };
   const { onTouchStart, onTouchEnd } = useSwipe(onSwipeLeft, onSwipeRight, 10);
+  useRead(text);
   return (
     <View
       style={styles.container}
-    >
-      <ScrollView style={{ ...styles.reader }}
       onTouchEnd={onTouchEnd}
-      onTouchStart={onTouchStart}>
-        {textMap.map((para, index) => {
-          let text = para.map((line) => line).join(" ");
-          return (
-            <Text key={index} style={styles.paraText}>
-              {text}
-            </Text>
-          );
-        })}
-        {textMap.map((para, index) => {
-          let text = para.map((line) => line).join(" ");
-          return (
-            <Text key={index} style={styles.paraText}>
-              {text}
-            </Text>
-          );
-        })}
+      onTouchStart={onTouchStart}
+    >
+      <ScrollView style={{ ...styles.reader }}>
         {textMap.map((para, index) => {
           let text = para.map((line) => line).join(" ");
           return (

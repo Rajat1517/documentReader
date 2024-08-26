@@ -38,7 +38,7 @@ const HomeScreen = ({navigation}) => {
             })
           }}
         >
-          <Text style={styles.buttonText}>Browse</Text>
+          <Text style={styles.buttonText}>Read</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
