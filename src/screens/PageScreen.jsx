@@ -11,11 +11,12 @@ import { useSwipe } from "../hooks/useSwipe";
 import useRead from "../hooks/useRead";
 
 
-const text= `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus facilisis, nunc sit amet tempor convallis, ex sapien fringilla tortor, eget venenatis felis justo at neque.
+const text= `
+                  Hello!
 
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus facilisis, nunc sit amet tempor convallis, ex sapien fringilla tortor, eget venenatis felis justo at neque.
 
-Nulla nec libero ac lacus tincidunt fermentum. Integer nec quam vitae ipsum pulvinar hendrerit. Fusce gravida sapien non est faucibus, vel aliquam est lobortis. 
-
+Nulla nec libero ac lacus tincidunt fermentum. Integer nec quam vitae ipsum pulvinar hendrerit. Fusce gravida sapien non est faucibus, vel aliquam est lobortis.
 Quisque id mauris vel mi tempus convallis. 
 
 Suspendisse ac eros suscipit, facilisis justo in, suscipit felis. Proin ultricies tincidunt magna.`
@@ -30,7 +31,7 @@ const PageScreen = ({ route }) => {
     console.log("Right swipe");
   };
   const { onTouchStart, onTouchEnd } = useSwipe(onSwipeLeft, onSwipeRight, 10);
-  useRead(text);
+  const [startReading]= useRead(text);
   return (
     <View
       style={styles.container}
@@ -76,9 +77,9 @@ const PageScreen = ({ route }) => {
           height: "15%",
         }}
       >
-        {/* <TouchableOpacity style={styles.navigationButton}>
-          <Text>Next</Text>
-        </TouchableOpacity> */}
+        <TouchableOpacity style={styles.navigationButton} onPress={startReading} >
+          <Text>Read</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
