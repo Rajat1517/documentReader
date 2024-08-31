@@ -12,26 +12,30 @@ import useRead from "../hooks/useRead";
 
 
 const text= `
-                  Hello!
+                  Hello!   Baby
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus facilisis, nunc sit amet tempor convallis, ex sapien fringilla tortor, eget venenatis felis justo at neque.
+Para 1 line 1Para 1 line 1Para 1 line 1Para 1 line 1Para 1 line 1Para 1 line 1Para 1 line 1Para 1 line 1Para 1 line 1. Para1 line 2Para1 line 2Para1 line 2Para1 line 2Para1 line 2Para1 line 2Para1 line 2Para1 line 2Para1 line 2Para1 line 2.
 
-Nulla nec libero ac lacus tincidunt fermentum. Integer nec quam vitae ipsum pulvinar hendrerit. Fusce gravida sapien non est faucibus, vel aliquam est lobortis.
-Quisque id mauris vel mi tempus convallis. 
+Para 2 line 1Para 2 line 1Para 2 line 1Para 2 line 1Para 2 line 1Para 2 line 1. Para 2 line 2Para 2 line 2Para 2 line 2Para 2 line 2Para 2 line 2Para 2 line 2Para 2 line 2. Para 2 line 3 Para 2 line 3Para 2 line 3Para 2 line 3Para 2 line 3Para 2 line 3.
 
-Suspendisse ac eros suscipit, facilisis justo in, suscipit felis. Proin ultricies tincidunt magna.`
+Para 3 line 1Para 3 line 1Para 3 line 1Para 3 line 1Para 3 line 1. 
+
+Para 4 line 1 Para 4 line 1Para 4 line 1Para 4 line 1Para 4 line 1Para 4 line 1Para 4 line 1.`
 
 const PageScreen = ({ route }) => {
   const { textMap } = route.params;
 
   const onSwipeLeft = () => {
-    console.log("Left swipe");
+    console.log("left swipe");
+    forwardPage();
   };
   const onSwipeRight = () => {
-    console.log("Right swipe");
+    console.log("right swipe");
+    backPage();
   };
   const { onTouchStart, onTouchEnd } = useSwipe(onSwipeLeft, onSwipeRight, 10);
-  const [startReading]= useRead(text);
+  const [startReading,stopReading,resumeReading,pauseReading,forwardPage,forwardSentence,forwardPara, backPage,backPara,backSentence]= useRead(text);
+
   return (
     <View
       style={styles.container}
@@ -55,32 +59,22 @@ const PageScreen = ({ route }) => {
             </Text>
           );
         })}
-        {textMap.map((para, index) => {
-          let text = para.map((line) => line).join(" ");
-          return (
-            <Text key={index} style={styles.paraText}>
-              {text}
-            </Text>
-          );
-        })}
-        {textMap.map((para, index) => {
-          let text = para.map((line) => line).join(" ");
-          return (
-            <Text key={index} style={styles.paraText}>
-              {text}
-            </Text>
-          );
-        })}
+  
       </ScrollView>
-      <View
-        style={{
-          height: "15%",
-        }}
-      >
-        <TouchableOpacity style={styles.navigationButton} onPress={startReading} >
+        <View style={styles.controlPanel}>
+          <TouchableOpacity style={styles.navigationButton} onPress={startReading} >
           <Text>Read</Text>
         </TouchableOpacity>
-      </View>
+        <TouchableOpacity style={styles.navigationButton} onPress={stopReading} >
+          <Text>stop</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navigationButton} onPress={pauseReading} >
+          <Text>pause</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navigationButton} onPress={resumeReading} >
+          <Text>resume</Text>
+        </TouchableOpacity>
+        </View>
     </View>
   );
 };
@@ -110,4 +104,13 @@ const styles = StyleSheet.create({
     borderColor: "#000",
     borderWidth: 1,
   },
+  controlPanel:{
+    width: "100%",
+    height: "20%",
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+    borderColor: "black",
+    borderWidth: 1,
+  }
 });
