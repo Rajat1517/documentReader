@@ -9,14 +9,12 @@ const useRead = (text) => {
   const [isReading, setIsReading] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
-  const ref = useRef({
-    para: 0,
-    sentence: 0,
-    page: 0,
-    doc: [],
-    isPaused: false,
-    isReading: false,
-  });
+  const paraRef = useRef(0);
+  const pageRef = useRef(0);
+  const sentenceRef = useRef(0);
+  const docRef = useRef([]);
+  const readingRef = useRef(false);
+  const pausedRef = useRef(false);
 
   const createMap = useCallback(() => {
     let paras = text.split(/\n+/).map((para) => para.trim());
@@ -38,7 +36,7 @@ const useRead = (text) => {
       } else {
         let lastPage = pages[pages.length - 1];
 
-        if (para.characters + lastPage.characters > 300) {
+        if (para.characters + lastPage.characters > 1400) {
           let lines = para.para.split(/(?<=[.?!])\s+/).map((line) => ({
             line,
             characters: line.length,
@@ -47,7 +45,7 @@ const useRead = (text) => {
           let len = lastPage.characters;
           let index = 0;
           while (index < lines.length) {
-            if (len + lines[index].characters <= 300) {
+            if (len + lines[index].characters <= 1400) {
               len += lines[index].characters;
               index++;
             } else break;
@@ -97,15 +95,12 @@ const useRead = (text) => {
   }, [text]);
 
   useEffect(() => {
-    ref.current = {
-      ...ref.current,
-      page: page,
-      para: para,
-      sentence: sentence,
-      doc: doc,
-      isPaused: isPaused,
-      isReading: isReading,
-    };
+    readingRef.current = isReading;
+    pausedRef.current = isPaused;
+    docRef.current = doc;
+    pageRef.current = page;
+    paraRef.current = para;
+    sentenceRef.current = sentence;
   }, [doc, para, sentence, page, isPaused, isReading]);
 
   useEffect(() => {
@@ -116,27 +111,29 @@ const useRead = (text) => {
   }, []);
 
   const handleSentenceEnd = () => {
-    const { sentence, page, para, doc } = ref.current;
-    console.log(page, para, sentence);
-    if (sentence < doc[page].paras[para].length - 1) {
-      Speech.speak(doc[page].paras[para][sentence + 1], {
-        onDone: handleSentenceEnd,
-        language: "en-IN"
-      });
-      setSentence(sentence + 1);
-    } else if (para < doc[page].paras.length - 1) {
-      Speech.speak(doc[page].paras[para + 1][0], {
-        onDone: handleSentenceEnd,
-        language: "en-IN"
-      });
-      setPara(para + 1);
+    if (
+      sentenceRef.current <
+      docRef.current[pageRef.current].paras[paraRef.current].length - 1
+    ) {
+      // console.log("changed line",pageRef.current, paraRef.current, sentenceRef.current + 1)
+      readThisSentence(
+        pageRef.current,
+        paraRef.current,
+        sentenceRef.current + 1
+      );
+      setSentence(sentenceRef.current + 1);
+    } else if (
+      paraRef.current <
+      docRef.current[pageRef.current].paras.length - 1
+    ) {
+      // console.log("changed para",pageRef.current, paraRef.current + 1, 0);
+      readThisSentence(pageRef.current, paraRef.current + 1, 0);
+      setPara(paraRef.current + 1);
       setSentence(0);
-    } else if (page < doc.length - 1) {
-      Speech.speak(doc[page + 1].paras[0][0], {
-        onDone: handleSentenceEnd,
-        language: "en-IN"
-      });
-      setPage(page + 1);
+    } else if (pageRef.current < docRef.current.length - 1) {
+      // console.log("changed page",pageRef.current + 1, 0, 0);
+      readThisSentence(pageRef.current + 1, 0, 0);
+      setPage(pageRef.current + 1);
       setPara(0);
       setSentence(0);
     } else stopReading();
@@ -148,16 +145,16 @@ const useRead = (text) => {
     // let  languages= await Speech.getAvailableVoicesAsync();
     // languages= new Set(languages.map(lang=> lang.language));
     // console.log(languages);
-    Speech.speak(ref.current.doc[0].paras[0][0], {
-      onDone: handleSentenceEnd,
-      language: "en-IN",
-    });
+    readThisSentence(0, 0, 0);
   };
 
   const stopReading = () => {
     setIsReading(false);
     setIsPaused(false);
     Speech.stop();
+    setPage(0);
+    setPara(0);
+    setSentence(0);
   };
 
   const pauseReading = () => {
@@ -169,91 +166,111 @@ const useRead = (text) => {
   const resumeReading = () => {
     setIsPaused(false);
     setIsReading(true);
-    Speech.speak(
-      ref.current.doc[ref.current.page].paras[ref.current.para][
-        ref.current.sentence
-      ],
-      {
-        onDone: handleSentenceEnd,
-        language: "en-IN"
-      }
-    );
+    readThisSentence(pageRef.current, paraRef.current, sentenceRef.current);
+  };
+
+  const readThisSentence = (page, para, sentence) => {
+    Speech.stop();
+    Speech.speak(docRef.current[page].paras[para][sentence], {
+      onDone: handleSentenceEnd,
+      language: "en-IN",
+    });
   };
 
   const forwardPage = () => {
-    if (ref.current.page < ref.current.doc.length - 1) {
-      setPage((prev) => prev + 1);
+    if (pageRef.current < docRef.current.length - 1) {
+      setPage(pageRef.current+1);
       setPara(0);
       setSentence(0);
+      if(isReading && !isPaused)readThisSentence(pageRef.current+1,0,0);
     }
   };
 
   const backPage = () => {
-    if (ref.current.page > 0) {
-      setPage((prev) => prev - 1);
+    if (pageRef.current > 0) {
+      setPage(pageRef.current-1);
       setPara(0);
       setSentence(0);
+      if(isReading && !isPaused)readThisSentence(pageRef.current-1,0,0);
     }
   };
 
   const forwardPara = () => {
-    if (
-      ref.current.para <
-      ref.current.doc[refref.current.page].paras.length - 1
-    ) {
-      setPara((prev) => prev + 1);
+    if (paraRef.current < docRef.current[pageRef.current]?.paras.length - 1) {
+      setPara(paraRef.current+1);
       setSentence(0);
+      if(isReading && !isPaused) readThisSentence(pageRef.current,paraRef.current+1,0);
     } else forwardPage();
   };
 
   const backPara = () => {
-    if (ref.current.para > 0) {
-      setPara((prev) => prev - 1);
+    if (paraRef.current > 0) {
+      setPara(paraRef.current-1);
       setSentence(0);
+      if(isReading && !isPaused)readThisSentence(pageRef.current,paraRef.current-1,0);
     } else {
-      if (ref.current.page > 0) {
-        const newPage = ref.current.page - 1;
-        const newPara = ref.current.doc[newPage].paras.length - 1;
+      if (pageRef.current > 0) {
+        const newPage = pageRef.current - 1;
+        const newPara = docRef.current[newPage].paras.length - 1;
         setPage(newPage);
         setPara(newPara);
         setSentence(0);
+        if(isReading && !isPaused)readThisSentence(newPage,newPara,0);
       }
     }
   };
 
   const forwardSentence = () => {
-    if (
-      ref.current.sentence <
-      ref.current.doc[ref.current.page].paras[ref.current.para].length - 1
-    ) {
-      const newSentence = ref.current.sentence + 1;
+    if ( sentenceRef.current < docRef.current[pageRef.current]?.paras[paraRef.current].length - 1) {
+      const newSentence = sentenceRef.current + 1;
       setSentence(newSentence);
+      // console.log(pageRef.current, paraRef.current, sentenceRef.current + 1);
+      if (isReading && !isPaused) readThisSentence( pageRef.current, paraRef.current, sentenceRef.current + 1);
     } else forwardPara();
   };
 
   const backSentence = () => {
-    if (ref.current.sentence > 0) {
-      const newSentence = ref.current.sentence - 1;
+    if (sentenceRef.current > 0) {
+      const newSentence = sentenceRef.current - 1;
       setSentence(newSentence);
+      // console.log(pageRef.current, paraRef.current, sentenceRef.current - 1);
+      if(isReading && !isPaused)readThisSentence(pageRef.current,paraRef.current,sentenceRef.current-1);
     } else {
-      if (ref.current.para > 0) {
-        const newPara = ref.current.para - 1;
+      if (paraRef.current > 0) {
+        const newPara = paraRef.current - 1;
         const newSentence =
-          ref.current.doc[ref.current.page].paras[ref.current.para].length - 1;
+          docRef.current[pageRef.current].paras[newPara].length - 1;
         setPara(newPara);
         setSentence(newSentence);
-      } else if (ref.current.page > 0) {
-        const newPage = ref.current.page - 1;
-        const newPara = ref.current.doc[newPage].paras.length - 1;
-        const newSentence = ref.current.doc[newPage].paras[newPara].length - 1;
+        if(isReading && !isPaused)readThisSentence(pageRef.current,newPara,newSentence);
+      } else if (pageRef.current > 0) {
+        const newPage = pageRef.current - 1;
+        const newPara = docRef.current[newPage].paras.length - 1;
+        const newSentence = docRef.current[newPage].paras[newPara].length - 1;
         setPage(newPage);
         setPara(newPara);
         setSentence(newSentence);
+        if(isReading && !isPaused)readThisSentence(newPage,newPara,newSentence);
       }
     }
   };
 
-  return [startReading,stopReading,resumeReading,pauseReading,forwardPage,forwardSentence,forwardPara, backPage,backPara,backSentence];
+  return [
+    doc,
+    page,
+    para,
+    sentence,
+    startReading,
+    stopReading,
+    resumeReading,
+    pauseReading,
+    forwardPage,
+    forwardSentence,
+    forwardPara,
+    backPage,
+    backPara,
+    backSentence,
+  ];
 };
 
 export default useRead;

@@ -9,18 +9,15 @@ import {
 import React from "react";
 import { useSwipe } from "../hooks/useSwipe";
 import useRead from "../hooks/useRead";
+import Ionicons from "@expo/vector-icons/FontAwesome6";
 
+const text = `
+Generating random paragraphs can be an excellent way for writers to get their creative flow going at the beginning of the day. The writer has no idea what topic the random paragraph will be about when it appears. This forces the writer to use creativity to complete one of three common writing challenges. The writer can use the paragraph as the first one of a short story and build upon it. A second option is to use the random paragraph somewhere in a short story they create. The third option is to have the random paragraph be the ending paragraph in a short story. No matter which of these challenges is undertaken, the writer is forced to use creativity to incorporate the paragraph into their writing.
 
-const text= `
-                  Hello!   Baby
+A random paragraph can also be an excellent way for a writer to tackle writers' block. Writing block can often happen due to being stuck with a current project that the writer is trying to complete. By inserting a completely random paragraph from which to begin, it can take down some of the issues that may have been causing the writers' block in the first place.
 
-Para 1 line 1Para 1 line 1Para 1 line 1Para 1 line 1Para 1 line 1Para 1 line 1Para 1 line 1Para 1 line 1Para 1 line 1. Para1 line 2Para1 line 2Para1 line 2Para1 line 2Para1 line 2Para1 line 2Para1 line 2Para1 line 2Para1 line 2Para1 line 2.
-
-Para 2 line 1Para 2 line 1Para 2 line 1Para 2 line 1Para 2 line 1Para 2 line 1. Para 2 line 2Para 2 line 2Para 2 line 2Para 2 line 2Para 2 line 2Para 2 line 2Para 2 line 2. Para 2 line 3 Para 2 line 3Para 2 line 3Para 2 line 3Para 2 line 3Para 2 line 3.
-
-Para 3 line 1Para 3 line 1Para 3 line 1Para 3 line 1Para 3 line 1. 
-
-Para 4 line 1 Para 4 line 1Para 4 line 1Para 4 line 1Para 4 line 1Para 4 line 1Para 4 line 1.`
+Another productive way to use this tool to begin a daily writing routine. One way is to generate a random paragraph with the intention to try to rewrite it while still keeping the original meaning. The purpose here is to just get the writing started so that when the writer goes onto their day's writing projects, words are already flowing from their fingers.
+`;
 
 const PageScreen = ({ route }) => {
   const { textMap } = route.params;
@@ -34,7 +31,22 @@ const PageScreen = ({ route }) => {
     backPage();
   };
   const { onTouchStart, onTouchEnd } = useSwipe(onSwipeLeft, onSwipeRight, 10);
-  const [startReading,stopReading,resumeReading,pauseReading,forwardPage,forwardSentence,forwardPara, backPage,backPara,backSentence]= useRead(text);
+  const [
+    doc,
+    page,
+    para,
+    sentence,
+    startReading,
+    stopReading,
+    resumeReading,
+    pauseReading,
+    forwardPage,
+    forwardSentence,
+    forwardPara,
+    backPage,
+    backPara,
+    backSentence,
+  ] = useRead(text);
 
   return (
     <View
@@ -43,38 +55,63 @@ const PageScreen = ({ route }) => {
       onTouchStart={onTouchStart}
     >
       <ScrollView style={{ ...styles.reader }}>
-        {textMap.map((para, index) => {
+        {/* {textMap.map((para, index) => {
           let text = para.map((line) => line).join(" ");
           return (
             <Text key={index} style={styles.paraText}>
               {text}
             </Text>
           );
-        })}
-        {textMap.map((para, index) => {
-          let text = para.map((line) => line).join(" ");
-          return (
-            <Text key={index} style={styles.paraText}>
-              {text}
-            </Text>
-          );
-        })}
-  
+        })} */}
+        {doc.length > 0 &&
+          doc[page].paras.map((paragraph, paraIndex) => (
+            <View key={paraIndex}>
+              <Text style={{ ...styles.paraText }}>
+                {paragraph.map((line, lineIndex) => (
+                  <Text
+                    key={lineIndex}
+                    style={{
+                      color:
+                        lineIndex === sentence && paraIndex === para
+                          ? "blue"
+                          : "black",
+                      ...styles.paraText,
+                    }}
+                  >
+                    {" "}
+                    {line}
+                  </Text>
+                ))}
+              </Text>
+            </View>
+          ))}
       </ScrollView>
-        <View style={styles.controlPanel}>
-          <TouchableOpacity style={styles.navigationButton} onPress={startReading} >
-          <Text>Read</Text>
+      <View style={styles.controlPanel}>
+        <TouchableOpacity style={styles.navigationButton} onPress={backPara}>
+          <Text>Back Para</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navigationButton} onPress={stopReading} >
-          <Text>stop</Text>
+        <TouchableOpacity
+          style={styles.navigationButton}
+          onPress={backSentence}
+        >
+          <Text>back Sentence</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navigationButton} onPress={pauseReading} >
-          <Text>pause</Text>
+        <TouchableOpacity
+          style={styles.navigationButton}
+          onPress={startReading}
+        >
+          <Text>play/pause</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navigationButton} onPress={resumeReading} >
-          <Text>resume</Text>
+        <TouchableOpacity
+          style={styles.navigationButton}
+          onPress={forwardSentence}
+        >
+          <Text>next sentence</Text>
         </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.navigationButton} onPress={forwardPara}>
+          <Text>next Para</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -100,17 +137,17 @@ const styles = StyleSheet.create({
   },
   navigationButton: {
     height: "50%",
-    width: "10%",
+    width: "15%",
     borderColor: "#000",
     borderWidth: 1,
   },
-  controlPanel:{
+  controlPanel: {
     width: "100%",
-    height: "20%",
+    height: "25%",
     flexDirection: "row",
     justifyContent: "space-evenly",
     alignItems: "center",
     borderColor: "black",
     borderWidth: 1,
-  }
+  },
 });
