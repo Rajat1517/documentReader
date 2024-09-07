@@ -145,7 +145,7 @@ const useRead = (text) => {
     // let  languages= await Speech.getAvailableVoicesAsync();
     // languages= new Set(languages.map(lang=> lang.language));
     // console.log(languages);
-    readThisSentence(0, 0, 0);
+    readThisSentence(pageRef.current, paraRef.current, sentenceRef.current);
   };
 
   const stopReading = () => {
@@ -159,7 +159,6 @@ const useRead = (text) => {
 
   const pauseReading = () => {
     setIsPaused(true);
-    setIsReading(false);
     Speech.stop();
   };
 
@@ -260,6 +259,8 @@ const useRead = (text) => {
     page,
     para,
     sentence,
+    isReading,
+    isPaused,
     startReading,
     stopReading,
     resumeReading,
