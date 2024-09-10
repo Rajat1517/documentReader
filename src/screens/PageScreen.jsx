@@ -6,30 +6,31 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import React from "react";
+import React,{useRef} from "react";
 import { useSwipe } from "../hooks/useSwipe";
 import useRead from "../hooks/useRead";
 import Ionicons from "@expo/vector-icons/FontAwesome5";
 
-const text = `
-Generating random paragraphs can be an excellent way for writers to get their creative flow going at the beginning of the day. The writer has no idea what topic the random paragraph will be about when it appears. This forces the writer to use creativity to complete one of three common writing challenges. The writer can use the paragraph as the first one of a short story and build upon it. A second option is to use the random paragraph somewhere in a short story they create. The third option is to have the random paragraph be the ending paragraph in a short story. No matter which of these challenges is undertaken, the writer is forced to use creativity to incorporate the paragraph into their writing.
-
-A random paragraph can also be an excellent way for a writer to tackle writers' block. Writing block can often happen due to being stuck with a current project that the writer is trying to complete. By inserting a completely random paragraph from which to begin, it can take down some of the issues that may have been causing the writers' block in the first place.
-
-Another productive way to use this tool to begin a daily writing routine. One way is to generate a random paragraph with the intention to try to rewrite it while still keeping the original meaning. The purpose here is to just get the writing started so that when the writer goes onto their day's writing projects, words are already flowing from their fingers. Another productive way to use this tool to begin a daily writing routine. One way is to generate a random paragraph with the intention to try to rewrite it while still keeping the original meaning. The purpose here is to just get the writing started so that when the writer goes onto their day's writing projects, words are already flowing from their fingers.
-`;
 
 const PageScreen = ({ route }) => {
-  const { textMap } = route.params;
+  const { text } = route.params;
+  const readerRef= useRef(null);
 
   const onSwipeLeft = () => {
-    // console.log("left swipe");
     forwardPage();
+    readerRef.current?.scrollTo({
+      y:0,
+      animated: true,
+    })
   };
   const onSwipeRight = () => {
-    // console.log("right swipe");
     backPage();
+    readerRef.current?.scrollTo({
+      y:0,
+      animated: true,
+    })
   };
+
   const { onTouchStart, onTouchEnd } = useSwipe(onSwipeLeft, onSwipeRight, 10);
   const [
     doc,
@@ -56,19 +57,12 @@ const PageScreen = ({ route }) => {
       onTouchEnd={onTouchEnd}
       onTouchStart={onTouchStart}
     >
-      <ScrollView style={{ ...styles.reader }}>
-        {/* {textMap.map((para, index) => {
-          let text = para.map((line) => line).join(" ");
-          return (
-            <Text key={index} style={styles.paraText}>
-              {text}
-            </Text>
-          );
-        })} */}
-        <Text style={{width: "100%", textAlign: "center"}}>[ {page + 1} ]</Text>
+      <ScrollView style={{ ...styles.reader }} ref={readerRef}>
+        <Text style={{width: "100%", textAlign: "center",marginVertical: "1%"}}>[ {page + 1} ]</Text>
         {doc.length > 0 &&
           doc[page].paras.map((paragraph, paraIndex) => (
-            <View key={paraIndex}>
+            <View key={paraIndex} style={{paddingBottom: "3%"}} onTouchEnd={onTouchEnd}
+            onTouchStart={onTouchStart}>
               <Text style={{ ...styles.paraText }}>
                 {paragraph.map((line, lineIndex) => (
                   <Text
@@ -156,7 +150,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
   },
   paraText: {
-    marginVertical: "2%",
+    marginVertical: "1%",
     fontSize: 15,
     textAlign: "justify",
   },
