@@ -10,6 +10,9 @@ import {
 import * as DocPicker from "expo-document-picker";
 import * as FS from "expo-file-system";
 import dummy from "../assets/dummy.json";
+import { decode as atob } from "base-64";
+import mammoth from "mammoth";
+import { TextDecoder } from "text-encoding";
 
 const HomeScreen = ({ navigation }) => {
   const [file, setFile] = useState(null);
@@ -18,13 +21,29 @@ const HomeScreen = ({ navigation }) => {
   const pickDocument = async () => {
     try {
       const result = await DocPicker.getDocumentAsync({
-        type: "text/plain",
+        type: [
+          "text/plain",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ],
         copyToCacheDirectory: true,
       });
 
       if (!result.canceled) {
         setFile(result);
-        readFile(result.assets[0].uri);
+        switch (result.assets[0].mimeType) {
+          case "text/plain":
+            readTextFile(result.assets[0].uri);
+            break;
+          case "application/msword":
+            readDocFile(result.assets[0].uri);
+            break;
+          case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            readDocFile(result.assets[0].uri);
+            break;
+          default:
+            console.log("Unsupported File Format");
+        }
       } else {
         console.log("Document picker was cancelled");
       }
@@ -33,12 +52,26 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
-  const readFile = async (fileURI) => {
+  const readTextFile = async (fileURI) => {
     try {
       const content = await FS.readAsStringAsync(fileURI);
       setText(content);
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const readDocFile = async (fileURI) => {
+    try {
+      const response = await fetch(fileURI);
+      const arrayBuffer = await response.arrayBuffer();
+
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const res = await mammoth.extractRawText({ arrayBuffer: uint8Array });
+      console.log("done");
+      setText(res.value);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -66,9 +99,11 @@ const HomeScreen = ({ navigation }) => {
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
-              navigation.navigate("Reader", {
-                text,
-              });
+              if (text.length > 0) {
+                navigation.navigate("Reader", {
+                  text,
+                });
+              }
             }}
           >
             <Text style={styles.buttonText}>{file.assets[0].name}</Text>

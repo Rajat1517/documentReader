@@ -58,7 +58,7 @@ const PageScreen = ({ route }) => {
       onTouchStart={onTouchStart}
     >
       <ScrollView style={{ ...styles.reader }} ref={readerRef}>
-        <Text style={{width: "100%", textAlign: "center",marginVertical: "1%"}}>[ {page + 1} ]</Text>
+        <Text style={{width: "100%", textAlign: "center",marginVertical: "1%"}}>[ {page + 1}/{doc.length} ]</Text>
         {doc.length > 0 &&
           doc[page].paras.map((paragraph, paraIndex) => (
             <View key={paraIndex} style={{paddingBottom: "3%"}} onTouchEnd={onTouchEnd}
