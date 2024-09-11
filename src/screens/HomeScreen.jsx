@@ -6,17 +6,18 @@ import {
   StyleSheet,
   Image,
   View,
+  Modal
 } from "react-native";
 import * as DocPicker from "expo-document-picker";
 import * as FS from "expo-file-system";
 import dummy from "../assets/dummy.json";
-import { decode as atob } from "base-64";
 import mammoth from "mammoth";
 import { TextDecoder } from "text-encoding";
 
 const HomeScreen = ({ navigation }) => {
   const [file, setFile] = useState(null);
   const [text, setText] = useState("");
+  const [loading,setLoading]= useState(false);
 
   const pickDocument = async () => {
     try {
@@ -54,8 +55,10 @@ const HomeScreen = ({ navigation }) => {
 
   const readTextFile = async (fileURI) => {
     try {
+      setLoading(true);
       const content = await FS.readAsStringAsync(fileURI);
       setText(content);
+      setLoading(false);
     } catch (error) {
       console.log(error);
     }
@@ -63,12 +66,13 @@ const HomeScreen = ({ navigation }) => {
 
   const readDocFile = async (fileURI) => {
     try {
+      setLoading(true);
       const response = await fetch(fileURI);
       const arrayBuffer = await response.arrayBuffer();
 
       const uint8Array = new Uint8Array(arrayBuffer);
       const res = await mammoth.extractRawText({ arrayBuffer: uint8Array });
-      console.log("done");
+      setLoading(false);
       setText(res.value);
     } catch (error) {
       console.error(error);
@@ -113,6 +117,25 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.buttonText}>Upload</Text>
         </TouchableOpacity>
       </View>
+      <Modal visible={loading}
+        transparent={true}
+       style={{
+        position: "absolute",
+        top:0,
+        left:0,
+        height: "100%",
+        width: "100%",
+      }}>
+        <View style={{
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          width: "100%",
+          backgroundColor: "rgba(255,255,255,0.8)",
+        }}>
+          <Text style={{fontSize: 25,}}>Loading...</Text>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
