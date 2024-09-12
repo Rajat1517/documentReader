@@ -194,6 +194,13 @@ const useRead = (text) => {
     }
   };
 
+  const jumpPage= (val)=>{
+    setPage(val-1);
+    setPara(0);
+    setSentence(0);
+    if(isReading && !isPaused)readThisSentence(val-1,0,0);
+  }
+
   const forwardPara = () => {
     if (paraRef.current < docRef.current[pageRef.current]?.paras.length - 1) {
       setPara(paraRef.current+1);
@@ -271,6 +278,7 @@ const useRead = (text) => {
     backPage,
     backPara,
     backSentence,
+    jumpPage
   ];
 };
 

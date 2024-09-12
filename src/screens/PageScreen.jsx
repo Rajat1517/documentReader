@@ -6,29 +6,30 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import React,{useRef} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSwipe } from "../hooks/useSwipe";
 import useRead from "../hooks/useRead";
 import Ionicons from "@expo/vector-icons/FontAwesome5";
-
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Slider from "@react-native-community/slider";
 
 const PageScreen = ({ route }) => {
   const { text } = route.params;
-  const readerRef= useRef(null);
+  const readerRef = useRef(null);
 
   const onSwipeLeft = () => {
     forwardPage();
     readerRef.current?.scrollTo({
-      y:0,
+      y: 0,
       animated: true,
-    })
+    });
   };
   const onSwipeRight = () => {
     backPage();
     readerRef.current?.scrollTo({
-      y:0,
+      y: 0,
       animated: true,
-    })
+    });
   };
 
   const { onTouchStart, onTouchEnd } = useSwipe(onSwipeLeft, onSwipeRight, 10);
@@ -49,51 +50,91 @@ const PageScreen = ({ route }) => {
     backPage,
     backPara,
     backSentence,
+    jumpPage,
   ] = useRead(text);
 
+  const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    setStep(page + 1);
+  }, [page]);
+
   return (
-    <View
-      style={styles.container}
-      onTouchEnd={onTouchEnd}
-      onTouchStart={onTouchStart}
-    >
-      <ScrollView style={{ ...styles.reader }} ref={readerRef}>
-        <Text style={{width: "100%", textAlign: "center",marginVertical: "1%"}}>[ {page + 1}/{doc.length} ]</Text>
-        {doc.length > 0 &&
-          doc[page].paras.map((paragraph, paraIndex) => (
-            <View key={paraIndex} style={{paddingBottom: "3%"}} onTouchEnd={onTouchEnd}
-            onTouchStart={onTouchStart}>
-              <Text style={{ ...styles.paraText }}>
-                {paragraph.map((line, lineIndex) => (
-                  <Text
-                    key={lineIndex}
-                    style={{
-                      color:
-                        lineIndex === sentence && paraIndex === para
-                          ? "rgb(40, 67, 135)"
-                          : "black",
-                      ...styles.paraText,
-                    }}
-                  >
-                    {" "}
-                    {line}
-                  </Text>
-                ))}
-              </Text>
-            </View>
-          ))}
-      </ScrollView>
+    <View style={styles.container}>
+        <ScrollView
+          onTouchEnd={onTouchEnd}
+          onTouchStart={onTouchStart}
+          style={{ ...styles.reader }}
+          ref={readerRef}
+        >
+          <Text
+            style={{ width: "100%", textAlign: "center", marginVertical: "1%" }}
+          >
+            [ {page + 1}/{doc.length} ]
+          </Text>
+          {doc.length > 0 &&
+            doc[page].paras.map((paragraph, paraIndex) => (
+              <View
+                key={paraIndex}
+                style={{ paddingBottom: "3%" }}
+                onTouchEnd={onTouchEnd}
+                onTouchStart={onTouchStart}
+              >
+                <Text style={{ ...styles.paraText }}>
+                  {paragraph.map((line, lineIndex) => (
+                    <Text
+                      key={lineIndex}
+                      style={{
+                        color:
+                          lineIndex === sentence && paraIndex === para
+                            ? "rgb(40, 67, 135)"
+                            : "black",
+                        ...styles.paraText,
+                      }}
+                    >
+                      {" "}
+                      {line}
+                    </Text>
+                  ))}
+                </Text>
+              </View>
+            ))}
+        </ScrollView>
+      <View
+        onTouchEnd={onTouchEnd}
+        onTouchStart={onTouchStart}
+        style={{
+          textAlign: "center",
+          justifyContent: "center",
+          width: "100%",
+          alignItems: "center",
+          paddingBottom: "5%",
+        }}
+      >
+        <MaterialIcons name="swipe" size={30} style={{ textAlign: "center" }} />
+      </View>
+      <Text>{step}</Text>
+      <Slider
+        style={{ width: "90%", height: "2%" }}
+        step={1}
+        value={step}
+        minimumValue={1}
+        maximumValue={doc.length}
+        minimumTrackTintColor="black"
+        maximumTrackTintColor="grey"
+        onValueChange={(val) => setStep(val)}
+        thumbTintColor={"black"}
+        onSlidingComplete={jumpPage}
+      />
       <View style={styles.controlPanel}>
         <TouchableOpacity style={styles.navigationButton} onPress={backPara}>
           <Ionicons name="fast-backward" size={30} />
-          {/* <Text>Back Para</Text> */}
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navigationButton}
           onPress={backSentence}
         >
           <Ionicons name="step-backward" size={30} />
-          {/* <Text>back Sentence</Text> */}
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navigationButton}
@@ -116,7 +157,6 @@ const PageScreen = ({ route }) => {
           onPress={forwardSentence}
         >
           <Ionicons name="step-forward" size={30} />
-          {/* <Text>next sentence</Text> */}
         </TouchableOpacity>
         <TouchableOpacity style={styles.navigationButton} onPress={forwardPara}>
           <Ionicons name="fast-forward" size={30} />
@@ -134,14 +174,12 @@ const styles = StyleSheet.create({
     padding: 0,
     margin: 0,
     flex: 1,
-    // borderColor: "black",
-    // borderWidth: 1,
   },
   reader: {
     marginVertical: "5%",
     paddingHorizontal: "10%",
     flexGrow: 0,
-    height: "75%",
+    height: "70%",
     width: "98%",
     borderColor: "black",
     borderWidth: 1.5,
@@ -170,8 +208,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-evenly",
     alignItems: "center",
-    // borderColor: "black",
-    // borderWidth: 1,
     padding: 2,
     margin: 0,
   },
