@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Image,
   View,
-  Modal
+  Modal,
 } from "react-native";
 import * as DocPicker from "expo-document-picker";
 import * as FS from "expo-file-system";
@@ -17,7 +17,7 @@ import { TextDecoder } from "text-encoding";
 const HomeScreen = ({ navigation }) => {
   const [file, setFile] = useState(null);
   const [text, setText] = useState("");
-  const [loading,setLoading]= useState(false);
+  const [loading, setLoading] = useState(false);
 
   const pickDocument = async () => {
     try {
@@ -117,23 +117,29 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.buttonText}>Upload</Text>
         </TouchableOpacity>
       </View>
-      <Modal visible={loading}
+      <Modal
+        visible={loading}
         transparent={true}
-       style={{
-        position: "absolute",
-        top:0,
-        left:0,
-        height: "100%",
-        width: "100%",
-      }}>
-        <View style={{
-          justifyContent: "center",
-          alignItems: "center",
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
           height: "100%",
           width: "100%",
-          backgroundColor: "rgba(255,255,255,0.8)",
-        }}>
-          <Text style={{fontSize: 25,}}>Loading...</Text>
+        }}
+      >
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+            width: "100%",
+            backgroundColor: "rgba(255,255,255,0.9)",
+          }}
+        >
+          <Text style={{ fontSize: 25, textAlign: "center" }}>
+            Compliling...
+          </Text>
         </View>
       </Modal>
     </SafeAreaView>
