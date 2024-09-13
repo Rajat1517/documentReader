@@ -173,6 +173,8 @@ const useRead = (text) => {
     Speech.speak(docRef.current[page].paras[para][sentence], {
       onDone: handleSentenceEnd,
       language: "en-IN",
+      rate: 0.8,
+      pitch: 1,
     });
   };
 
