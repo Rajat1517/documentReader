@@ -1,7 +1,13 @@
 {
   "expo": {
     "name": "Document Reader",
-    "slug": "Document Reader",
-    "version": "1.0.0"
+    "slug": "documentreader",
+    "version": "1.0.0",
+    "extra": {
+      "eas": {
+        "projectId": "4fb068e0-5057-49f5-a4ea-90edacd7098f"
+      }
+    },
+    "owner": "rajat_1715"
   }
 }
