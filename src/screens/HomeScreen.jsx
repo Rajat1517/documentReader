@@ -107,6 +107,7 @@ const HomeScreen = ({ navigation }) => {
               if (text.length > 0) {
                 navigation.navigate("Reader", {
                   text,
+                  docName: file.assets[0].name
                 });
               }
             }}

@@ -1,22 +1,42 @@
 import {
   View,
   Text,
-  SafeAreaView,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Modal,
 } from "react-native";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState, useLayoutEffect } from "react";
 import { useSwipe } from "../hooks/useSwipe";
 import useRead from "../hooks/useRead";
-import Ionicons from "@expo/vector-icons/FontAwesome5";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import IonIcons from "@expo/vector-icons/Ionicons";
 import Slider from "@react-native-community/slider";
 import { useFocusEffect } from "@react-navigation/native";
+import { languageCodes } from "../constants";
+import DropDownPicker from "react-native-dropdown-picker";
 
-const PageScreen = ({ route }) => {
-  const { text } = route.params;
+const PageScreen = ({ navigation, route }) => {
+  const { text, docName } = route.params;
   const readerRef = useRef(null);
+  const [customise, setCustomise] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [step, setStep] = useState(1);
+  const [items, setItems] = useState(
+    languageCodes.map((code) => ({
+      label: code.label,
+      value: code.value,
+    }))
+  );
+
+  useLayoutEffect(() => {
+    if (docName !== undefined) {
+      navigation.setOptions({
+        title: `${docName}`,
+      });
+    }
+  }, [navigation]);
 
   const onSwipeLeft = () => {
     forwardPage();
@@ -41,6 +61,9 @@ const PageScreen = ({ route }) => {
     sentence,
     isReading,
     isPaused,
+    shrill,
+    speed,
+    language,
     startReading,
     stopReading,
     resumeReading,
@@ -52,9 +75,10 @@ const PageScreen = ({ route }) => {
     backPara,
     backSentence,
     jumpPage,
+    setShrill,
+    setSpeed,
+    setLangugae,
   ] = useRead(text);
-
-  const [step, setStep] = useState(1);
 
   useFocusEffect(
     useCallback(() => {
@@ -64,6 +88,15 @@ const PageScreen = ({ route }) => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.settings}
+        onPress={() => {
+          pauseReading();
+          setCustomise(true);
+        }}
+      >
+        <MaterialIcons name="settings" size={21} />
+      </TouchableOpacity>
       <ScrollView
         onTouchEnd={onTouchEnd}
         onTouchStart={onTouchStart}
@@ -106,13 +139,7 @@ const PageScreen = ({ route }) => {
       <View
         onTouchEnd={onTouchEnd}
         onTouchStart={onTouchStart}
-        style={{
-          textAlign: "center",
-          justifyContent: "center",
-          width: "100%",
-          alignItems: "center",
-          paddingBottom: "5%",
-        }}
+        style={styles.swipeArea}
       >
         <MaterialIcons name="swipe" size={30} style={{ textAlign: "center" }} />
       </View>
@@ -131,13 +158,13 @@ const PageScreen = ({ route }) => {
       />
       <View style={styles.controlPanel}>
         <TouchableOpacity style={styles.navigationButton} onPress={backPara}>
-          <Ionicons name="fast-backward" size={30} />
+          <FontAwesome5 name="fast-backward" size={30} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navigationButton}
           onPress={backSentence}
         >
-          <Ionicons name="step-backward" size={30} />
+          <FontAwesome5 name="step-backward" size={30} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navigationButton}
@@ -147,11 +174,11 @@ const PageScreen = ({ route }) => {
         >
           <Text>
             {!isReading ? (
-              <Ionicons name="play" size={30} />
+              <FontAwesome5 name="play" size={30} />
             ) : isPaused ? (
-              <Ionicons name="play" size={30} />
+              <FontAwesome5 name="play" size={30} />
             ) : (
-              <Ionicons name="pause" size={30} />
+              <FontAwesome5 name="pause" size={30} />
             )}
           </Text>
         </TouchableOpacity>
@@ -159,12 +186,71 @@ const PageScreen = ({ route }) => {
           style={styles.navigationButton}
           onPress={forwardSentence}
         >
-          <Ionicons name="step-forward" size={30} />
+          <FontAwesome5 name="step-forward" size={30} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navigationButton} onPress={forwardPara}>
-          <Ionicons name="fast-forward" size={30} />
+          <FontAwesome5 name="fast-forward" size={30} />
         </TouchableOpacity>
       </View>
+      <Modal animationType="slide" transparent={true} visible={customise}>
+        <View style={styles.modalContainer}>
+          <View style={styles.settingsMenu}>
+            <Text style={styles.settingsTitle}>Language</Text>
+            <DropDownPicker
+              open={open}
+              value={language}
+              items={items}
+              setOpen={setOpen}
+              setValue={setLangugae}
+              setItems={setItems}
+              searchable={true}
+              searchPlaceholder="Search language..."
+              placeholder="Choose a language"
+              style={styles.dropdown}
+              dropDownContainerStyle={styles.dropdownContainer}
+              scrollViewProps={{
+                nestedScrollEnabled: true,
+                contentContainerStyle: styles.scrollContent,
+              }}
+            />
+            <Text style={styles.settingsTitle}>Speed: {speed}</Text>
+            <Slider
+              style={{ width: "80%", height: "2%" }}
+              step={0.25}
+              value={speed}
+              minimumValue={0.5}
+              maximumValue={5}
+              minimumTrackTintColor="black"
+              maximumTrackTintColor="grey"
+              onValueChange={(val) => setSpeed(val)}
+              thumbTintColor={"black"}
+              onSlidingComplete={(val) => setSpeed(val)}
+            />
+            <Text style={styles.settingsTitle}>Pitch: {shrill}</Text>
+            <Slider
+              style={{ width: "80%", height: "2%" }}
+              step={0.25}
+              value={shrill}
+              minimumValue={0.5}
+              maximumValue={1.5}
+              minimumTrackTintColor="black"
+              maximumTrackTintColor="grey"
+              onValueChange={(val) => setShrill(val)}
+              thumbTintColor={"black"}
+              onSlidingComplete={(val) => setShrill(val)}
+            />
+            <TouchableOpacity
+              onPress={() => {
+                setCustomise(false);
+                setOpen(false);
+                if (isReading) resumeReading();
+              }}
+            >
+              <IonIcons name="checkmark-done-circle" size={30} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -213,5 +299,54 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 2,
     margin: 0,
+  },
+  swipeArea: {
+    textAlign: "center",
+    justifyContent: "center",
+    width: "100%",
+    alignItems: "center",
+    paddingBottom: "5%",
+  },
+  modalContainer: {
+    backgroundColor: "rgba(255,255,255,1)",
+    height: "100%",
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  settings: {
+    position: "absolute",
+    top: "4%",
+    left: "4%",
+    zIndex: 1,
+  },
+  settingsTitle: { fontWeight: "600", fontSize: 20 },
+  settingsMenu: {
+    justifyContent: "space-evenly",
+    height: "60%",
+    width: "80%",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,1)",
+    borderColor: "black",
+    borderWidth: 1,
+    borderRadius: 20,
+  },
+  dropdown: {
+    height: "10%",
+    width: "80%",
+    borderWidth: 1,
+    borderColor: "black",
+    marginHorizontal: "10%",
+  },
+  dropdownContainer: {
+    width: "80%",
+    borderWidth: 1,
+    borderColor: "#888",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    marginHorizontal: "10%",
+  },
+  scrollContent: {
+    paddingRight: 10,
   },
 });
