@@ -1,4 +1,4 @@
-package com.expojs
+package com.document_reader
 
 import android.os.Build
 import android.os.Bundle

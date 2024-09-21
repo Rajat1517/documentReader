@@ -5,6 +5,9 @@
     "slug": "documentreader",
     "version": "1.0.0",
     "orientation":"potrait",
+    "android": {
+      "package": "com.document_reader"
+    },
     "extra": {
       "eas": {
         "projectId": "4fb068e0-5057-49f5-a4ea-90edacd7098f"
