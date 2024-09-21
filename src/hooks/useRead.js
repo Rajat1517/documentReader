@@ -115,7 +115,6 @@ const useRead = (text) => {
       sentenceRef.current <
       docRef.current[pageRef.current].paras[paraRef.current].length - 1
     ) {
-      // console.log("changed line",pageRef.current, paraRef.current, sentenceRef.current + 1)
       readThisSentence(
         pageRef.current,
         paraRef.current,
@@ -126,12 +125,10 @@ const useRead = (text) => {
       paraRef.current <
       docRef.current[pageRef.current].paras.length - 1
     ) {
-      // console.log("changed para",pageRef.current, paraRef.current + 1, 0);
       readThisSentence(pageRef.current, paraRef.current + 1, 0);
       setPara(paraRef.current + 1);
       setSentence(0);
     } else if (pageRef.current < docRef.current.length - 1) {
-      // console.log("changed page",pageRef.current + 1, 0, 0);
       readThisSentence(pageRef.current + 1, 0, 0);
       setPage(pageRef.current + 1);
       setPara(0);
@@ -144,7 +141,6 @@ const useRead = (text) => {
     setIsPaused(false);
     // let  languages= await Speech.getAvailableVoicesAsync();
     // languages= new Set(languages.map(lang=> lang.language));
-    // console.log(languages);
     readThisSentence(pageRef.current, paraRef.current, sentenceRef.current);
   };
 
@@ -232,7 +228,6 @@ const useRead = (text) => {
     if ( sentenceRef.current < docRef.current[pageRef.current]?.paras[paraRef.current].length - 1) {
       const newSentence = sentenceRef.current + 1;
       setSentence(newSentence);
-      // console.log(pageRef.current, paraRef.current, sentenceRef.current + 1);
       if (isReading && !isPaused) readThisSentence( pageRef.current, paraRef.current, sentenceRef.current + 1);
     } else forwardPara();
   };
@@ -241,7 +236,6 @@ const useRead = (text) => {
     if (sentenceRef.current > 0) {
       const newSentence = sentenceRef.current - 1;
       setSentence(newSentence);
-      // console.log(pageRef.current, paraRef.current, sentenceRef.current - 1);
       if(isReading && !isPaused)readThisSentence(pageRef.current,paraRef.current,sentenceRef.current-1);
     } else {
       if (paraRef.current > 0) {

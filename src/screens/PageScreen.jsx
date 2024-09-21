@@ -6,12 +6,13 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useSwipe } from "../hooks/useSwipe";
 import useRead from "../hooks/useRead";
 import Ionicons from "@expo/vector-icons/FontAwesome5";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Slider from "@react-native-community/slider";
+import { useFocusEffect } from "@react-navigation/native";
 
 const PageScreen = ({ route }) => {
   const { text } = route.params;
@@ -55,51 +56,53 @@ const PageScreen = ({ route }) => {
 
   const [step, setStep] = useState(1);
 
-  useEffect(() => {
-    setStep(page + 1);
-  }, [page]);
+  useFocusEffect(
+    useCallback(() => {
+      setStep(page + 1);
+    }, [page])
+  );
 
   return (
     <View style={styles.container}>
-        <ScrollView
-          onTouchEnd={onTouchEnd}
-          onTouchStart={onTouchStart}
-          style={{ ...styles.reader }}
-          ref={readerRef}
+      <ScrollView
+        onTouchEnd={onTouchEnd}
+        onTouchStart={onTouchStart}
+        style={{ ...styles.reader }}
+        ref={readerRef}
+      >
+        <Text
+          style={{ width: "100%", textAlign: "center", marginVertical: "1%" }}
         >
-          <Text
-            style={{ width: "100%", textAlign: "center", marginVertical: "1%" }}
-          >
-            [ {page + 1}/{doc.length} ]
-          </Text>
-          {doc.length > 0 &&
-            doc[page].paras.map((paragraph, paraIndex) => (
-              <View
-                key={paraIndex}
-                style={{ paddingBottom: "3%" }}
-                onTouchEnd={onTouchEnd}
-                onTouchStart={onTouchStart}
-              >
-                <Text style={{ ...styles.paraText }}>
-                  {paragraph.map((line, lineIndex) => (
-                    <Text
-                      key={lineIndex}
-                      style={{
-                        color:
-                          lineIndex === sentence && paraIndex === para
-                            ? "rgb(40, 67, 135)"
-                            : "black",
-                        ...styles.paraText,
-                      }}
-                    >
-                      {" "}
-                      {line}
-                    </Text>
-                  ))}
-                </Text>
-              </View>
-            ))}
-        </ScrollView>
+          [ {page + 1}/{doc.length} ]
+        </Text>
+        {doc.length > 0 &&
+          doc[page].paras.map((paragraph, paraIndex) => (
+            <View
+              key={paraIndex}
+              style={{ paddingBottom: "3%" }}
+              onTouchEnd={onTouchEnd}
+              onTouchStart={onTouchStart}
+            >
+              <Text style={{ ...styles.paraText }}>
+                {paragraph.map((line, lineIndex) => (
+                  <Text
+                    key={lineIndex}
+                    style={{
+                      color:
+                        lineIndex === sentence && paraIndex === para
+                          ? "rgb(40, 67, 135)"
+                          : "black",
+                      ...styles.paraText,
+                    }}
+                  >
+                    {" "}
+                    {line}
+                  </Text>
+                ))}
+              </Text>
+            </View>
+          ))}
+      </ScrollView>
       <View
         onTouchEnd={onTouchEnd}
         onTouchStart={onTouchStart}

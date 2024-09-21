@@ -7,6 +7,7 @@ import {
   Image,
   View,
   Modal,
+  ActivityIndicator
 } from "react-native";
 import * as DocPicker from "expo-document-picker";
 import * as FS from "expo-file-system";
@@ -109,8 +110,9 @@ const HomeScreen = ({ navigation }) => {
                 });
               }
             }}
+            disabled={loading}
           >
-            <Text style={styles.buttonText}>{file.assets[0].name}</Text>
+            <Text numberOfLines={1} style={styles.buttonText}>{file.assets[0].name}</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity style={styles.button} onPress={pickDocument}>
@@ -124,22 +126,21 @@ const HomeScreen = ({ navigation }) => {
           position: "absolute",
           top: 0,
           left: 0,
-          height: "100%",
-          width: "100%",
         }}
       >
         <View
           style={{
-            justifyContent: "center",
+            justifyContent: "space-around",
             alignItems: "center",
             height: "100%",
             width: "100%",
-            backgroundColor: "rgba(255,255,255,0.9)",
+            backgroundColor: "rgba(255,255,255,0.93)",
           }}
         >
-          <Text style={{ fontSize: 25, textAlign: "center" }}>
-            Compliling...
+          <Text style={{ fontSize: 25, textAlign: "center", fontWeight: "400" }}>
+            Compiling...
           </Text>
+          <ActivityIndicator size={60} color={"black"}/>
         </View>
       </Modal>
     </SafeAreaView>
