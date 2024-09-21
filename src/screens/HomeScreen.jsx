@@ -7,19 +7,21 @@ import {
   Image,
   View,
   Modal,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
 import * as DocPicker from "expo-document-picker";
 import * as FS from "expo-file-system";
 import dummy from "../assets/dummy.json";
 import mammoth from "mammoth";
 import { TextDecoder } from "text-encoding";
+import Error from "../components/Error";
 
 const HomeScreen = ({ navigation }) => {
   const [file, setFile] = useState(null);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const [errorVisible, setErrorVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("No error");
   const pickDocument = async () => {
     try {
       const result = await DocPicker.getDocumentAsync({
@@ -50,7 +52,8 @@ const HomeScreen = ({ navigation }) => {
         console.log("Document picker was cancelled");
       }
     } catch (error) {
-      console.error("Error picking document:", error);
+      setErrorMessage("Error while picking document");
+      setErrorVisible(true);
     }
   };
 
@@ -59,9 +62,11 @@ const HomeScreen = ({ navigation }) => {
       setLoading(true);
       const content = await FS.readAsStringAsync(fileURI);
       setText(content);
-      setLoading(false);
     } catch (error) {
-      console.log(error);
+      setErrorMessage("Error while extracting text");
+      setErrorVisible(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,13 +75,14 @@ const HomeScreen = ({ navigation }) => {
       setLoading(true);
       const response = await fetch(fileURI);
       const arrayBuffer = await response.arrayBuffer();
-
       const uint8Array = new Uint8Array(arrayBuffer);
       const res = await mammoth.extractRawText({ arrayBuffer: uint8Array });
-      setLoading(false);
       setText(res.value);
     } catch (error) {
-      console.error(error);
+      setErrorMessage("Error while extracting text");
+      setErrorVisible(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,13 +113,15 @@ const HomeScreen = ({ navigation }) => {
               if (text.length > 0) {
                 navigation.navigate("Reader", {
                   text,
-                  docName: file.assets[0].name
+                  docName: file.assets[0].name,
                 });
               }
             }}
             disabled={loading}
           >
-            <Text numberOfLines={1} style={styles.buttonText}>{file.assets[0].name}</Text>
+            <Text numberOfLines={1} style={styles.buttonText}>
+              {file.assets[0].name}
+            </Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity style={styles.button} onPress={pickDocument}>
@@ -138,12 +146,20 @@ const HomeScreen = ({ navigation }) => {
             backgroundColor: "rgba(255,255,255,0.93)",
           }}
         >
-          <Text style={{ fontSize: 25, textAlign: "center", fontWeight: "400" }}>
-            Compiling...
+          <Text
+            style={{ fontSize: 25, textAlign: "center", fontWeight: "400" }}
+          >
+            Compiling. 
+            This can take a few minutes!
           </Text>
-          <ActivityIndicator size={60} color={"black"}/>
+          <ActivityIndicator size={60} color={"black"} />
         </View>
       </Modal>
+      <Error
+        message={errorMessage}
+        errorVisible={errorVisible}
+        setErrorVisible={setErrorVisible}
+      />
     </SafeAreaView>
   );
 };
